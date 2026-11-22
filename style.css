@@ -1,0 +1,834 @@
+/* ==================== VARIABLES & RESET ==================== */
+:root {
+  --bg-deep: #071712;
+  --bg-card: rgba(13, 36, 28, 0.86);
+  --bg-card-solid: #0e281f;
+  --gold-primary: #e8c372;
+  --gold-bright: #f7dc94;
+  --gold-dim: rgba(232, 195, 114, 0.28);
+  --text-main: #f3f6f4;
+  --text-muted: #a6bdb3;
+  --emerald-accent: #2dd4bf;
+  --correct-bg: rgba(16, 185, 129, 0.16);
+  --correct-border: #10b981;
+  --wrong-bg: rgba(239, 68, 68, 0.16);
+  --wrong-border: #ef4444;
+  --font-display: 'Cinzel', Georgia, serif;
+  --font-body: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  min-height: 100vh;
+  background: radial-gradient(circle at 50% 15%, #113528 0%, var(--bg-deep) 75%);
+  color: var(--text-main);
+  font-family: var(--font-body);
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+#bg-particles,
+#confetti-canvas {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+#confetti-canvas {
+  z-index: 50;
+}
+
+/* ==================== LAYOUT UTAMA ==================== */
+.app-wrapper {
+  position: relative;
+  z-index: 1;
+  max-width: 1160px;
+  margin: 0 auto;
+  padding: 28px 20px 44px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.screen {
+  display: none;
+  animation: fadeSlideUp 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.screen.active {
+  display: block;
+}
+
+@keyframes fadeSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ==================== TAHAP 1: PETA NUSANTARA ==================== */
+.map-hero-header {
+  text-align: center;
+  margin-bottom: 22px;
+}
+
+.badge-era {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  color: var(--gold-primary);
+  background: rgba(232, 195, 114, 0.1);
+  border: 1px solid var(--gold-dim);
+  padding: 5px 14px;
+  border-radius: 999px;
+  margin-bottom: 10px;
+}
+
+.main-title {
+  font-family: var(--font-display);
+  font-size: clamp(1.65rem, 3.2vw, 2.5rem);
+  font-weight: 800;
+  color: var(--gold-bright);
+  letter-spacing: 0.03em;
+  margin-bottom: 6px;
+}
+
+.subtitle {
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.map-workspace {
+  display: grid;
+  grid-template-columns: 1.55fr 1fr;
+  gap: 20px;
+  align-items: stretch;
+  margin-bottom: 18px;
+}
+
+.map-viewport-card {
+  position: relative;
+  background: #071913;
+  border: 1px solid var(--gold-dim);
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45);
+  min-height: 330px;
+}
+
+.btn-reset-zoom {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 5;
+  background: rgba(11, 33, 25, 0.88);
+  color: var(--gold-primary);
+  border: 1px solid var(--gold-dim);
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-family: var(--font-body);
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-reset-zoom:hover {
+  background: var(--gold-primary);
+  color: #081a14;
+}
+
+#nusantara-svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+#map-camera {
+  transition: transform 0.75s cubic-bezier(0.22, 1, 0.36, 1);
+  transform-origin: 0 0;
+}
+
+.equator-line {
+  stroke: rgba(232, 195, 114, 0.22);
+  stroke-width: 1;
+  stroke-dasharray: 6 6;
+}
+
+.equator-label {
+  fill: rgba(232, 195, 114, 0.45);
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  font-weight: 600;
+}
+
+.grid-line {
+  stroke: rgba(255, 255, 255, 0.04);
+  stroke-width: 1;
+}
+
+.island {
+  fill: url(#islandGrad);
+  stroke: #499777;
+  stroke-width: 1.4;
+  transition: fill 0.3s ease;
+}
+
+.trade-route {
+  fill: none;
+  stroke: rgba(232, 195, 114, 0.45);
+  stroke-width: 1.6;
+  stroke-dasharray: 5 5;
+  animation: dashMove 18s linear infinite;
+}
+
+@keyframes dashMove {
+  to {
+    stroke-dashoffset: -200;
+  }
+}
+
+.kingdom-pin {
+  cursor: pointer;
+}
+
+.pin-pulse {
+  fill: rgba(232, 195, 114, 0.18);
+  stroke: rgba(232, 195, 114, 0.5);
+  stroke-width: 1;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: pulseRing 2.2s infinite ease-out;
+}
+
+.kingdom-pin.active .pin-pulse {
+  fill: rgba(247, 220, 148, 0.35);
+  stroke: var(--gold-bright);
+  stroke-width: 1.8;
+}
+
+@keyframes pulseRing {
+  0% {
+    transform: scale(0.75);
+    opacity: 0.9;
+  }
+  100% {
+    transform: scale(1.65);
+    opacity: 0;
+  }
+}
+
+.pin-core {
+  fill: var(--gold-primary);
+  stroke: #071712;
+  stroke-width: 2;
+  transition: transform 0.25s ease, fill 0.25s ease;
+}
+
+.kingdom-pin:hover .pin-core,
+.kingdom-pin.active .pin-core {
+  fill: #ffffff;
+  transform: scale(1.3);
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.pin-label {
+  fill: #e2ede8;
+  font-size: 11px;
+  font-weight: 700;
+  paint-order: stroke;
+  stroke: #071712;
+  stroke-width: 3px;
+}
+
+.kingdom-pin.active .pin-label {
+  fill: var(--gold-bright);
+}
+
+/* ==================== KARTU DETAIL KERAJAAN ==================== */
+.kingdom-card {
+  background: var(--bg-card);
+  backdrop-filter: blur(14px);
+  border: 1px solid var(--gold-dim);
+  border-radius: 20px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
+}
+
+.card-pop {
+  animation: cardHighlight 0.4s ease;
+}
+
+@keyframes cardHighlight {
+  0% {
+    transform: scale(0.98);
+    border-color: var(--gold-bright);
+  }
+  100% {
+    transform: scale(1);
+    border-color: var(--gold-dim);
+  }
+}
+
+.card-top-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+
+.kd-era {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--gold-primary);
+  background: rgba(232, 195, 114, 0.12);
+  padding: 4px 10px;
+  border-radius: 8px;
+}
+
+.kd-region {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.kd-name {
+  font-family: var(--font-display);
+  font-size: 1.45rem;
+  color: var(--gold-bright);
+  margin-bottom: 10px;
+}
+
+.kd-desc {
+  font-size: 0.92rem;
+  color: #dce7e2;
+  margin-bottom: 18px;
+}
+
+.kd-highlights {
+  display: grid;
+  gap: 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding-top: 14px;
+}
+
+.kd-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.kd-label {
+  font-size: 0.74rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+}
+
+.kd-value {
+  font-size: 0.92rem;
+  color: var(--gold-bright);
+}
+
+/* ==================== NAVIGASI PILL KERAJAAN ==================== */
+.kingdom-selector-bar {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 22px;
+}
+
+.k-pill {
+  background: rgba(13, 36, 28, 0.85);
+  color: var(--text-main);
+  border: 1px solid var(--gold-dim);
+  padding: 10px 18px;
+  border-radius: 999px;
+  font-family: var(--font-body);
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.22s ease;
+}
+
+.k-pill:hover {
+  border-color: var(--gold-primary);
+  transform: translateY(-2px);
+}
+
+.k-pill.active {
+  background: linear-gradient(135deg, #f2cf7e, #cfa045);
+  color: #081a14;
+  border-color: transparent;
+  font-weight: 700;
+  box-shadow: 0 6px 20px rgba(232, 195, 114, 0.32);
+}
+
+.map-cta-area {
+  text-align: center;
+}
+
+/* ==================== TOMBOL UTAMA & SEKUNDER ==================== */
+.btn-primary-gold {
+  background: linear-gradient(135deg, #f5d487 0%, #cfa045 100%);
+  color: #071912;
+  border: none;
+  padding: 14px 30px;
+  border-radius: 999px;
+  font-family: var(--font-body);
+  font-size: 0.96rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 10px 28px rgba(232, 195, 114, 0.28);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.btn-primary-gold:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 34px rgba(232, 195, 114, 0.42);
+}
+
+.btn-secondary {
+  background: transparent;
+  color: var(--text-main);
+  border: 1px solid var(--gold-dim);
+  padding: 13px 24px;
+  border-radius: 999px;
+  font-family: var(--font-body);
+  font-size: 0.92rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-secondary:hover {
+  border-color: var(--gold-primary);
+  background: rgba(232, 195, 114, 0.08);
+}
+
+/* ==================== TAHAP 2: REGISTRASI ==================== */
+.glass-card {
+  background: var(--bg-card);
+  backdrop-filter: blur(16px);
+  border: 1px solid var(--gold-dim);
+  border-radius: 24px;
+  padding: 36px 32px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+}
+
+.register-card {
+  max-width: 540px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.section-title {
+  font-family: var(--font-display);
+  font-size: 1.85rem;
+  color: var(--gold-bright);
+  margin-bottom: 10px;
+}
+
+.section-desc {
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  margin-bottom: 24px;
+}
+
+.input-group input {
+  width: 100%;
+  padding: 15px 20px;
+  border-radius: 14px;
+  border: 1.5px solid var(--gold-dim);
+  background: rgba(6, 20, 15, 0.9);
+  color: var(--text-main);
+  font-family: var(--font-body);
+  font-size: 1rem;
+  text-align: center;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.input-group input:focus {
+  border-color: var(--gold-primary);
+  box-shadow: 0 0 0 4px rgba(232, 195, 114, 0.14);
+}
+
+.error-msg {
+  color: #fca5a5;
+  font-size: 0.85rem;
+  margin-top: 8px;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.error-msg.visible {
+  opacity: 1;
+}
+
+.shake {
+  animation: shakeInput 0.35s ease;
+}
+
+@keyframes shakeInput {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-8px); }
+  75% { transform: translateX(8px); }
+}
+
+.register-actions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 22px;
+}
+
+/* ==================== TAHAP 3: KUIS ==================== */
+.quiz-card {
+  max-width: 760px;
+  margin: 0 auto;
+}
+
+.quiz-hud {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.hud-left {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.hud-explorer {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.hud-explorer strong {
+  color: var(--gold-bright);
+}
+
+.hud-progress-text {
+  font-size: 0.95rem;
+}
+
+.hud-score-box {
+  background: rgba(232, 195, 114, 0.12);
+  border: 1px solid var(--gold-dim);
+  padding: 8px 18px;
+  border-radius: 14px;
+  text-align: center;
+}
+
+.hud-score-box span {
+  display: block;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-muted);
+}
+
+.hud-score-box strong {
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  color: var(--gold-bright);
+}
+
+.progress-track {
+  width: 100%;
+  height: 7px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  overflow: hidden;
+  margin-bottom: 26px;
+}
+
+.progress-fill {
+  height: 100%;
+  width: 20%;
+  background: linear-gradient(90deg, #cfa045, #f7dc94);
+  transition: width 0.4s ease;
+}
+
+.q-category {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: var(--gold-primary);
+  margin-bottom: 8px;
+}
+
+.q-text {
+  font-size: 1.2rem;
+  font-weight: 700;
+  line-height: 1.5;
+  margin-bottom: 22px;
+}
+
+.options-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.option-btn {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+  background: rgba(8, 25, 19, 0.85);
+  border: 1.5px solid rgba(232, 195, 114, 0.22);
+  border-radius: 14px;
+  color: var(--text-main);
+  font-family: var(--font-body);
+  font-size: 0.96rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.option-btn:hover:not(:disabled) {
+  border-color: var(--gold-primary);
+  background: rgba(232, 195, 114, 0.08);
+  transform: translateX(4px);
+}
+
+.opt-letter {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
+  background: rgba(232, 195, 114, 0.14);
+  color: var(--gold-bright);
+  font-weight: 700;
+  display: grid;
+  place-items: center;
+}
+
+.option-btn.correct {
+  background: var(--correct-bg);
+  border-color: var(--correct-border);
+}
+
+.option-btn.correct .opt-letter {
+  background: var(--correct-border);
+  color: #051b11;
+}
+
+.option-btn.wrong {
+  background: var(--wrong-bg);
+  border-color: var(--wrong-border);
+}
+
+.option-btn.wrong .opt-letter {
+  background: var(--wrong-border);
+  color: #ffffff;
+}
+
+.feedback-box {
+  margin-top: 22px;
+  padding: 18px 20px;
+  border-radius: 16px;
+  border: 1px solid var(--gold-dim);
+  animation: fadeSlideUp 0.3s ease;
+}
+
+.feedback-box.hidden {
+  display: none;
+}
+
+.feedback-box.is-correct {
+  background: var(--correct-bg);
+  border-color: var(--correct-border);
+}
+
+.feedback-box.is-wrong {
+  background: var(--wrong-bg);
+  border-color: var(--wrong-border);
+}
+
+.feedback-header {
+  font-size: 1.02rem;
+  margin-bottom: 6px;
+}
+
+.feedback-box p {
+  font-size: 0.9rem;
+  color: #e2ede8;
+  margin-bottom: 16px;
+}
+
+/* ==================== TAHAP 4: SERTIFIKAT ==================== */
+.certificate-card {
+  max-width: 740px;
+  margin: 0 auto;
+  padding: 16px;
+}
+
+.cert-border {
+  border: 2px solid var(--gold-dim);
+  border-radius: 18px;
+  padding: 32px 26px;
+  text-align: center;
+}
+
+.cert-title {
+  font-family: var(--font-display);
+  font-size: clamp(1.5rem, 3vw, 2.1rem);
+  color: var(--gold-bright);
+  margin-bottom: 6px;
+}
+
+.cert-subtitle {
+  color: var(--text-muted);
+  font-size: 0.92rem;
+}
+
+.cert-explorer-name {
+  font-family: var(--font-display);
+  font-size: clamp(1.6rem, 3.5vw, 2.3rem);
+  font-weight: 800;
+  color: #ffffff;
+  margin: 8px 0;
+  text-decoration: underline;
+  text-decoration-color: var(--gold-dim);
+  text-underline-offset: 8px;
+}
+
+.cert-rank-badge {
+  display: inline-block;
+  margin-top: 6px;
+  padding: 6px 16px;
+  border-radius: 999px;
+  background: rgba(232, 195, 114, 0.16);
+  color: var(--gold-bright);
+  font-weight: 700;
+  font-size: 0.88rem;
+}
+
+.cert-score-summary {
+  margin: 24px 0;
+}
+
+.score-circle {
+  width: 112px;
+  height: 112px;
+  border-radius: 50%;
+  margin: 0 auto 10px;
+  border: 3px solid var(--gold-primary);
+  background: rgba(232, 195, 114, 0.1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.score-circle span {
+  font-family: var(--font-display);
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--gold-bright);
+  line-height: 1.1;
+}
+
+.score-circle small {
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  color: var(--text-muted);
+}
+
+.cert-stats-text {
+  font-size: 0.92rem;
+  color: var(--text-muted);
+}
+
+.review-list {
+  text-align: left;
+  display: grid;
+  gap: 10px;
+  margin-bottom: 26px;
+}
+
+.review-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: rgba(7, 23, 18, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  font-size: 0.86rem;
+}
+
+.rev-badge {
+  flex-shrink: 0;
+  padding: 3px 9px;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 0.78rem;
+}
+
+.review-item.ok .rev-badge {
+  background: var(--correct-bg);
+  color: #34d399;
+  border: 1px solid var(--correct-border);
+}
+
+.review-item.no .rev-badge {
+  background: var(--wrong-bg);
+  color: #f87171;
+  border: 1px solid var(--wrong-border);
+}
+
+.rev-content small {
+  display: block;
+  color: var(--gold-primary);
+  margin-top: 3px;
+}
+
+.cert-actions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+/* ==================== RESPONSIF MOBILE ==================== */
+@media (max-width: 860px) {
+  .map-workspace {
+    grid-template-columns: 1fr;
+  }
+
+  .map-viewport-card {
+    min-height: 260px;
+  }
+
+  .glass-card {
+    padding: 24px 18px;
+  }
+}

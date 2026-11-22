@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Penjelajah Sejarah Nusantara</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- Latar Partikel Emas & Konfeti -->
+  <canvas id="bg-particles"></canvas>
+  <canvas id="confetti-canvas"></canvas>
+
+  <main class="app-wrapper">
+    <!-- ==================== TAHAP 1: PETA KERAJAAN NUSANTARA ==================== -->
+    <section id="screen-map" class="screen active">
+      <div class="map-hero-header">
+        <span class="badge-era">EKSPLORASI PERADABAN MARITIM &amp; AGRARIS</span>
+        <h1 class="main-title">Peta Kejayaan Kerajaan Nusantara</h1>
+        <p class="subtitle">Klik pin di peta atau pilih tombol kerajaan di bawah untuk menelusuri jejak sejarah sebelum memulai tantangan.</p>
+      </div>
+
+      <div class="map-workspace">
+        <!-- Area Peta SVG Interaktif -->
+        <div class="map-viewport-card">
+          <button type="button" id="btn-reset-zoom" class="btn-reset-zoom" title="Reset Tampilan Peta">
+            Reset Peta
+          </button>
+
+          <svg id="nusantara-svg" viewBox="0 0 1000 440" preserveAspectRatio="xMidYMid meet">
+            <defs>
+              <radialGradient id="seaGlow" cx="50%" cy="50%" r="60%">
+                <stop offset="0%" stop-color="#143b2e" stop-opacity="0.55" />
+                <stop offset="100%" stop-color="#071712" stop-opacity="0.95" />
+              </radialGradient>
+              <linearGradient id="islandGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#2c634d" />
+                <stop offset="100%" stop-color="#173a2c" />
+              </linearGradient>
+              <filter id="goldGlow" x="-30%" y="-30%" width="160%" height="160%">
+                <feGaussianBlur stdDeviation="4" result="blur" />
+                <feMerge>
+                  <feMergeNode in="blur" />
+                  <feMergeNode in="SourceGraphic" />
+                </feMerge>
+              </filter>
+            </defs>
+
+            <rect width="1000" height="440" fill="url(#seaGlow)" />
+
+            <!-- Grup Peta yang dapat di-Pan & Zoom -->
+            <g id="map-camera">
+              <!-- Garis Khatulistiwa & Grid Navigasi -->
+              <line x1="0" y1="210" x2="1000" y2="210" class="equator-line" />
+              <text x="24" y="202" class="equator-label">0° GARIS KHATULISTIWA</text>
+              <line x1="250" y1="0" x2="250" y2="440" class="grid-line" />
+              <line x1="500" y1="0" x2="500" y2="440" class="grid-line" />
+              <line x1="750" y1="0" x2="750" y2="440" class="grid-line" />
+
+              <!-- Kepulauan Indonesia (Siluet Artistik) -->
+              <!-- Sumatera -->
+              <path class="island" d="M 85,95 L 125,85 L 175,130 L 235,195 L 265,248 L 245,275 L 200,245 L 145,180 L 95,125 Z" />
+              <!-- Jawa -->
+              <path class="island" d="M 275,302 L 345,306 L 425,316 L 468,325 L 460,342 L 395,338 L 325,330 L 270,318 Z" />
+              <!-- Bali & Nusa Tenggara -->
+              <path class="island" d="M 480,330 L 502,332 L 500,343 L 478,340 Z" />
+              <path class="island" d="M 514,333 L 548,334 L 545,345 L 512,343 Z" />
+              <path class="island" d="M 560,336 L 615,338 L 610,350 L 558,347 Z" />
+              <path class="island" d="M 622,354 L 668,344 L 665,358 L 618,366 Z" />
+              <!-- Kalimantan -->
+              <path class="island" d="M 355,140 L 420,105 L 485,120 L 515,165 L 495,225 L 445,248 L 385,242 L 348,205 Z" />
+              <!-- Sulawesi -->
+              <path class="island" d="M 548,165 L 615,155 L 635,168 L 592,188 L 618,225 L 605,258 L 582,235 L 570,262 L 545,255 L 552,210 Z" />
+              <!-- Maluku & Halmahera -->
+              <path class="island" d="M 685,152 L 712,145 L 718,178 L 695,188 Z" />
+              <path class="island" d="M 678,225 L 725,222 L 728,238 L 675,240 Z" />
+              <!-- Papua -->
+              <path class="island" d="M 775,188 L 825,182 L 855,205 L 945,215 L 945,305 L 885,295 L 845,260 L 795,235 L 768,208 Z" />
+
+              <!-- Jalur Pelayaran Rempah Nusantara -->
+              <path class="trade-route" d="M 225,235 Q 310,275 415,322 T 488,185 T 565,248 T 695,165" />
+
+              <!-- Pin Lokasi 5 Kerajaan -->
+              <g class="kingdom-pin active" data-id="sriwijaya" transform="translate(225, 235)">
+                <circle class="pin-pulse" r="18" />
+                <circle class="pin-core" r="7" filter="url(#goldGlow)" />
+                <text class="pin-label" y="-14" text-anchor="middle">Sriwijaya</text>
+              </g>
+
+              <g class="kingdom-pin" data-id="majapahit" transform="translate(418, 322)">
+                <circle class="pin-pulse" r="18" />
+                <circle class="pin-core" r="7" filter="url(#goldGlow)" />
+                <text class="pin-label" y="22" text-anchor="middle">Majapahit</text>
+              </g>
+
+              <g class="kingdom-pin" data-id="kutai" transform="translate(486, 182)">
+                <circle class="pin-pulse" r="18" />
+                <circle class="pin-core" r="7" filter="url(#goldGlow)" />
+                <text class="pin-label" y="-14" text-anchor="middle">Kutai</text>
+              </g>
+
+              <g class="kingdom-pin" data-id="gowatallo" transform="translate(562, 248)">
+                <circle class="pin-pulse" r="18" />
+                <circle class="pin-core" r="7" filter="url(#goldGlow)" />
+                <text class="pin-label" y="22" text-anchor="middle">Gowa-Tallo</text>
+              </g>
+
+              <g class="kingdom-pin" data-id="ternatetidore" transform="translate(694, 165)">
+                <circle class="pin-pulse" r="18" />
+                <circle class="pin-core" r="7" filter="url(#goldGlow)" />
+                <text class="pin-label" y="-14" text-anchor="middle">Ternate-Tidore</text>
+              </g>
+            </g>
+          </svg>
+        </div>
+
+        <!-- Panel Detail Kerajaan -->
+        <aside id="kingdom-detail-card" class="kingdom-card">
+          <div class="card-top-meta">
+            <span id="kd-era" class="kd-era">Abad ke-7 – ke-13 M</span>
+            <span id="kd-region" class="kd-region">Sumatera Selatan</span>
+          </div>
+          <h2 id="kd-name" class="kd-name">Kerajaan Sriwijaya</h2>
+          <p id="kd-desc" class="kd-desc">
+            Kemaharajaan maritim terbesar di Asia Tenggara yang menguasai jalur perdagangan Selat Malaka serta menjadi pusat pembelajaran agama Buddha bertaraf internasional.
+          </p>
+          <div class="kd-highlights">
+            <div class="kd-item">
+              <span class="kd-label">Raja Termasyhur</span>
+              <strong id="kd-king" class="kd-value">Balaputradewa</strong>
+            </div>
+            <div class="kd-item">
+              <span class="kd-label">Warisan &amp; Prasasti</span>
+              <strong id="kd-relic" class="kd-value">Prasasti Kedukan Bukit &amp; Candi Muara Takus</strong>
+            </div>
+          </div>
+        </aside>
+      </div>
+
+      <!-- Navigasi Pill 5 Kerajaan -->
+      <div class="kingdom-selector-bar" id="kingdom-buttons">
+        <button type="button" class="k-pill active" data-id="sriwijaya">1. Sriwijaya</button>
+        <button type="button" class="k-pill" data-id="majapahit">2. Majapahit</button>
+        <button type="button" class="k-pill" data-id="kutai">3. Kutai</button>
+        <button type="button" class="k-pill" data-id="gowatallo">4. Gowa-Tallo</button>
+        <button type="button" class="k-pill" data-id="ternatetidore">5. Ternate-Tidore</button>
+      </div>
+
+      <div class="map-cta-area">
+        <button type="button" id="btn-to-register" class="btn-primary-gold">
+          Lanjut Daftar Penjelajah &rarr;
+        </button>
+      </div>
+    </section>
+
+    <!-- ==================== TAHAP 2: REGISTRASI PENJELAJAH ==================== -->
+    <section id="screen-register" class="screen">
+      <div class="glass-card register-card">
+        <span class="badge-era">IDENTITAS EKSPEDISI</span>
+        <h2 class="section-title">Siapa Nama Penjelajahmu?</h2>
+        <p class="section-desc">
+          Masukkan nama lengkapmu untuk dicatat pada Piagam Kehormatan Penjelajah Sejarah Nusantara.
+        </p>
+
+        <form id="register-form" class="register-form" novalidate>
+          <div class="input-group" id="input-wrapper">
+            <input
+              type="text"
+              id="explorer-name"
+              placeholder="Ketik nama penjelajah di sini..."
+              autocomplete="off"
+              maxlength="40"
+            />
+          </div>
+          <p id="name-error" class="error-msg">Silakan masukkan nama terlebih dahulu sebelum memulai.</p>
+
+          <div class="register-actions">
+            <button type="button" id="btn-back-map" class="btn-secondary">
+              &larr; Kembali ke Peta
+            </button>
+            <button type="submit" id="btn-start-quiz" class="btn-primary-gold">
+              Mulai Kuis Sejarah
+            </button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <!-- ==================== TAHAP 3: KUIS 5 SOAL (20 POIN/SOAL) ==================== -->
+    <section id="screen-quiz" class="screen">
+      <div class="glass-card quiz-card">
+        <div class="quiz-hud">
+          <div class="hud-left">
+            <span class="hud-explorer">Penjelajah: <strong id="hud-name">-</strong></span>
+            <span class="hud-progress-text">Soal <strong id="q-current">1</strong> dari <strong>5</strong></span>
+          </div>
+          <div class="hud-score-box">
+            <span>Skor</span>
+            <strong id="hud-score">0</strong>
+          </div>
+        </div>
+
+        <div class="progress-track">
+          <div id="progress-fill" class="progress-fill"></div>
+        </div>
+
+        <div id="question-container" class="question-body">
+          <span id="q-category" class="q-category">KERAJAAN SRIWIJAYA</span>
+          <h3 id="q-text" class="q-text">Memuat pertanyaan...</h3>
+          <div id="options-list" class="options-grid"></div>
+        </div>
+
+        <div id="feedback-box" class="feedback-box hidden">
+          <div class="feedback-header">
+            <strong id="feedback-title">Jawaban Benar! +20 Poin</strong>
+          </div>
+          <p id="feedback-desc">Penjelasan sejarah akan muncul di sini.</p>
+          <button type="button" id="btn-next-question" class="btn-primary-gold">
+            Soal Berikutnya &rarr;
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== TAHAP 4: SERTIFIKAT HASIL AKHIR ==================== -->
+    <section id="screen-result" class="screen">
+      <div class="glass-card certificate-card">
+        <div class="cert-border">
+          <span class="badge-era">PIAGAM KEHORMATAN NUSANTARA</span>
+          <h2 class="cert-title">Sertifikat Penjelajah Sejarah</h2>
+          <p class="cert-subtitle">Diberikan dengan bangga kepada:</p>
+          <div id="cert-name" class="cert-explorer-name">Nama Penjelajah</div>
+          <div id="cert-rank" class="cert-rank-badge">Mahapatih Sejarah Nusantara</div>
+
+          <div class="cert-score-summary">
+            <div class="score-circle">
+              <span id="cert-final-score">100</span>
+              <small>TOTAL POIN</small>
+            </div>
+            <p id="cert-stats" class="cert-stats-text">Menjawab benar 5 dari 5 pertanyaan sejarah.</p>
+          </div>
+
+          <div id="review-list" class="review-list"></div>
+
+          <div class="cert-actions">
+            <button type="button" id="btn-replay-map" class="btn-secondary">
+              Jelajahi Peta Lagi
+            </button>
+            <button type="button" id="btn-retry-quiz" class="btn-primary-gold">
+              Ulangi Tantangan Kuis
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // ==================== DATA KERAJAAN NUSANTARA ====================
+      const kingdomsData = {
+        sriwijaya: {
+          name: 'Kerajaan Sriwijaya',
+          era: 'Abad ke-7 – ke-13 M',
+          region: 'Palembang, Sumatera Selatan',
+          king: 'Balaputradewa',
+          relic: 'Prasasti Kedukan Bukit & Candi Muara Takus',
+          desc: 'Kemaharajaan maritim terbesar di Asia Tenggara yang menguasai jalur pelayaran Selat Malaka serta menjadi pusat studi agama Buddha bertaraf internasional.',
+          zoom: { x: 225, y: 235, scale: 2.15 }
+        },
+        majapahit: {
+          name: 'Kerajaan Majapahit',
+          era: '1293 – 1527 M',
+          region: 'Trowulan, Jawa Timur',
+          king: 'Hayam Wuruk & Mahapatih Gajah Mada',
+          relic: 'Kitab Negarakertagama, Sutasoma & Gapura Bajang Ratu',
+          desc: 'Kerajaan agraris-maritim puncak kejayaan Nusantara yang mempersatukan kepulauan melalui Sumpah Palapa dan melahirkan semboyan Bhinneka Tunggal Ika.',
+          zoom: { x: 418, y: 315, scale: 2.25 }
+        },
+        kutai: {
+          name: 'Kerajaan Kutai Martadipura',
+          era: 'Abad ke-4 M (± 400 M)',
+          region: 'Muara Kaman, Kalimantan Timur',
+          king: 'Raja Mulawarman',
+          relic: '7 Buah Prasasti Yupa Beraksara Pallawa',
+          desc: 'Kerajaan Hindu tertua di Indonesia yang menandai berakhirnya zaman praaksara Nusantara, terkenal karena kedermawanan Raja Mulawarman menyedekahkan 20.000 ekor sapi.',
+          zoom: { x: 486, y: 185, scale: 2.15 }
+        },
+        gowatallo: {
+          name: 'Kesultanan Gowa-Tallo',
+          era: 'Abad ke-16 – ke-17 M',
+          region: 'Makassar, Sulawesi Selatan',
+          king: 'Sultan Hasanuddin (Ayam Jantan dari Timur)',
+          relic: 'Benteng Somba Opu, Fort Rotterdam & Perahu Pinisi',
+          desc: 'Kerajaan maritim tangguh di kawasan timur Indonesia yang menguasai pelayaran niaga rempah dan gigih melawan monopoli dagang VOC.',
+          zoom: { x: 565, y: 245, scale: 2.2 }
+        },
+        ternatetidore: {
+          name: 'Kesultanan Ternate & Tidore',
+          era: 'Abad ke-13 – ke-17 M',
+          region: 'Kepulauan Maluku Utara',
+          king: 'Sultan Baabullah & Sultan Nuku',
+          relic: 'Keraton Kesultanan Ternate & Benteng Tolukko',
+          desc: 'Pusat penghasil cengkeh dan pala terbaik dunia yang menjadi magnet pelayaran global serta berhasil mengusir penjajah Portugis dari Maluku.',
+          zoom: { x: 694, y: 175, scale: 2.2 }
+        }
+      };
+
+      // ==================== BANK 5 SOAL KUIS (20 POIN / SOAL) ====================
+      const quizQuestions = [
+        {
+          category: 'KERAJAAN KUTAI MARTADIPURA',
+          question: 'Bukti sejarah tertulis tertua yang menandai berdirinya Kerajaan Kutai Martadipura di Kalimantan Timur adalah...',
+          options: [
+            'Prasasti Kedukan Bukit',
+            'Tujuh buah Prasasti Yupa beraksara Pallawa',
+            'Kitab Negarakertagama',
+            'Prasasti Ciaruteun'
+          ],
+          correct: 1,
+          explanation: 'Tujuh buah Prasasti Yupa yang ditemukan di Muara Kaman ditulis dengan huruf Pallawa dan bahasa Sanskerta sekitar abad ke-4 Masehi.'
+        },
+        {
+          category: 'KEMAHARAJAAN SRIWIJAYA',
+          question: 'Faktor geografis utama yang menjadikan Kerajaan Sriwijaya berkembang sebagai pusat perdagangan maritim terbesar di Asia Tenggara adalah...',
+          options: [
+            'Menguasai jalur pelayaran strategis di Selat Malaka',
+            'Memiliki lahan pertanian padi terluas di Pulau Jawa',
+            'Menjadi satu-satunya penghasil cengkeh di dunia',
+            'Terletak di pesisir utara Pulau Sulawesi'
+          ],
+          correct: 0,
+          explanation: 'Letak Sriwijaya yang mengendalikan Selat Malaka menjadikannya gerbang utama perdagangan laut antara India dan Tiongkok.'
+        },
+        {
+          category: 'KERAJAAN MAJAPAHIT',
+          question: 'Semboyan "Bhinneka Tunggal Ika" yang menjadi pemersatu bangsa Indonesia berasal dari kitab peninggalan Majapahit karya Mpu Tantular, yaitu...',
+          options: [
+            'Kitab Pararaton',
+            'Kitab Arjunawiwaha',
+            'Kitab Sutasoma',
+            'Kitab Bharatayuddha'
+          ],
+          correct: 2,
+          explanation: 'Kutipan "Bhinneka Tunggal Ika Tan Hana Dharma Mangrwa" tertulis dalam Kakawin Sutasoma karangan Mpu Tantular pada masa Raja Hayam Wuruk.'
+        },
+        {
+          category: 'KESULTANAN GOWA-TALLO',
+          question: 'Karena keberaniannya memimpin perlawanan terhadap monopoli perdagangan VOC di Makassar, Sultan Hasanuddin dijuluki Belanda sebagai...',
+          options: [
+            'Pangeran Sabrang Lor',
+            'Ayam Jantan dari Timur',
+            'Singa dari Tanah Rencong',
+            'Pahlawan Laut Banda'
+          ],
+          correct: 1,
+          explanation: 'Belanda menjuluki Sultan Hasanuddin "De Haantjes van Het Oosten" (Ayam Jantan dari Timur) atas ketangguhannya mempertahankan kedaulatan maritim Makassar.'
+        },
+        {
+          category: 'KESULTANAN TERNATE & TIDORE',
+          question: 'Komoditas rempah bernilai tinggi dari Kesultanan Ternate dan Tidore yang memicu penjelajahan samudra bangsa Eropa ke Maluku adalah...',
+          options: [
+            'Kopi dan Teh',
+            'Cengkeh dan Pala',
+            'Tebu dan Kapas',
+            'Kayu Cendana dan Damar'
+          ],
+          correct: 1,
+          explanation: 'Kepulauan Maluku dikenal dunia sebagai "The Spice Islands" karena menjadi pusat penghasil cengkeh dan pala dengan nilai jual setara emas di Eropa.'
+        }
+      ];
+
+      // ==================== WEB AUDIO API (EFEK SUARA SINTESIS) ====================
+      let audioCtx = null;
+      function playTone(type) {
+        try {
+          if (!audioCtx) {
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            audioCtx = new AudioContext();
+          }
+          if (audioCtx.state === 'suspended') audioCtx.resume();
+
+          const now = audioCtx.currentTime;
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+
+          if (type === 'click') {
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(520, now);
+            osc.frequency.exponentialRampToValueAtTime(780, now + 0.08);
+            gain.gain.setValueAtTime(0.08, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.09);
+            osc.start(now);
+            osc.stop(now + 0.09);
+          } else if (type === 'correct') {
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(523.25, now);
+            osc.frequency.setValueAtTime(659.25, now + 0.09);
+            osc.frequency.setValueAtTime(783.99, now + 0.18);
+            gain.gain.setValueAtTime(0.12, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+            osc.start(now);
+            osc.stop(now + 0.35);
+          } else if (type === 'wrong') {
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(220, now);
+            osc.frequency.linearRampToValueAtTime(150, now + 0.25);
+            gain.gain.setValueAtTime(0.09, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.26);
+            osc.start(now);
+            osc.stop(now + 0.26);
+          } else if (type === 'victory') {
+            const notes = [523.25, 659.25, 783.99, 1046.5];
+            notes.forEach((freq, i) => {
+              const o = audioCtx.createOscillator();
+              const g = audioCtx.createGain();
+              o.type = 'triangle';
+              o.connect(g);
+              g.connect(audioCtx.destination);
+              o.frequency.setValueAtTime(freq, now + i * 0.11);
+              g.gain.setValueAtTime(0.12, now + i * 0.11);
+              g.gain.exponentialRampToValueAtTime(0.001, now + i * 0.11 + 0.4);
+              o.start(now + i * 0.11);
+              o.stop(now + i * 0.11 + 0.4);
+            });
+          }
+        } catch (e) {
+          // Abaikan jika browser memblokir audio sebelum interaksi penuh
+        }
+      }
+
+      // ==================== NAVIGASI ANTAR LAYAR ====================
+      const screens = {
+        map: document.getElementById('screen-map'),
+        register: document.getElementById('screen-register'),
+        quiz: document.getElementById('screen-quiz'),
+        result: document.getElementById('screen-result')
+      };
+
+      function switchScreen(targetKey) {
+        Object.values(screens).forEach((el) => el.classList.remove('active'));
+        screens[targetKey].classList.add('active');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+
+      // ==================== INTERAKSI PETA & ZOOM KERAJAAN ====================
+      const mapCamera = document.getElementById('map-camera');
+      const detailCard = document.getElementById('kingdom-detail-card');
+      const kdEra = document.getElementById('kd-era');
+      const kdRegion = document.getElementById('kd-region');
+      const kdName = document.getElementById('kd-name');
+      const kdDesc = document.getElementById('kd-desc');
+      const kdKing = document.getElementById('kd-king');
+      const kdRelic = document.getElementById('kd-relic');
+      const allPins = document.querySelectorAll('.kingdom-pin');
+      const allPills = document.querySelectorAll('.k-pill');
+
+      function focusKingdom(id, shouldZoom = true) {
+        const data = kingdomsData[id];
+        if (!data) return;
+
+        playTone('click');
+
+        // Perbarui status aktif pada pin dan tombol pill
+        allPins.forEach((pin) => {
+          pin.classList.toggle('active', pin.dataset.id === id);
+        });
+        allPills.forEach((btn) => {
+          btn.classList.toggle('active', btn.dataset.id === id);
+        });
+
+        // Animasi kartu detail
+        detailCard.classList.remove('card-pop');
+        void detailCard.offsetWidth;
+        detailCard.classList.add('card-pop');
+
+        kdEra.textContent = data.era;
+        kdRegion.textContent = data.region;
+        kdName.textContent = data.name;
+        kdDesc.textContent = data.desc;
+        kdKing.textContent = data.king;
+        kdRelic.textContent = data.relic;
+
+        // Smooth Zoom kamera SVG menuju titik koordinat kerajaan
+        if (shouldZoom) {
+          const { x, y, scale } = data.zoom;
+          const tx = 500 - x * scale;
+          const ty = 220 - y * scale;
+          mapCamera.style.transform = `translate(${tx}px, ${ty}px) scale(${scale})`;
+        }
+      }
+
+      function resetMapZoom() {
+        playTone('click');
+        mapCamera.style.transform = 'translate(0px, 0px) scale(1)';
+      }
+
+      allPins.forEach((pin) => {
+        pin.addEventListener('click', () => focusKingdom(pin.dataset.id, true));
+      });
+
+      allPills.forEach((btn) => {
+        btn.addEventListener('click', () => focusKingdom(btn.dataset.id, true));
+      });
+
+      document.getElementById('btn-reset-zoom').addEventListener('click', resetMapZoom);
+
+      // Inisialisasi tampilan awal Sriwijaya tanpa zoom ekstrem agar peta utuh terlihat dulu
+      focusKingdom('sriwijaya', false);
+
+      // ==================== TAHAP 2: REGISTRASI NAMA ====================
+      let explorerName = '';
+      const registerForm = document.getElementById('register-form');
+      const nameInput = document.getElementById('explorer-name');
+      const inputWrapper = document.getElementById('input-wrapper');
+      const nameError = document.getElementById('name-error');
+
+      document.getElementById('btn-to-register').addEventListener('click', () => {
+        playTone('click');
+        switchScreen('register');
+        setTimeout(() => nameInput.focus(), 200);
+      });
+
+      document.getElementById('btn-back-map').addEventListener('click', () => {
+        playTone('click');
+        switchScreen('map');
+      });
+
+      registerForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const val = nameInput.value.trim();
+        if (!val) {
+          playTone('wrong');
+          nameError.classList.add('visible');
+          inputWrapper.classList.remove('shake');
+          void inputWrapper.offsetWidth;
+          inputWrapper.classList.add('shake');
+          nameInput.focus();
+          return;
+        }
+        nameError.classList.remove('visible');
+        explorerName = val;
+        playTone('click');
+        startQuiz();
+      });
+
+      // ==================== TAHAP 3: LOGIKA KUIS 5 SOAL ====================
+      let currentIndex = 0;
+      let score = 0;
+      let answered = false;
+      let userAnswers = [];
+
+      const hudName = document.getElementById('hud-name');
+      const hudScore = document.getElementById('hud-score');
+      const qCurrent = document.getElementById('q-current');
+      const progressFill = document.getElementById('progress-fill');
+      const qCategory = document.getElementById('q-category');
+      const qText = document.getElementById('q-text');
+      const optionsList = document.getElementById('options-list');
+      const feedbackBox = document.getElementById('feedback-box');
+      const feedbackTitle = document.getElementById('feedback-title');
+      const feedbackDesc = document.getElementById('feedback-desc');
+      const btnNext = document.getElementById('btn-next-question');
+
+      function startQuiz() {
+        currentIndex = 0;
+        score = 0;
+        userAnswers = [];
+        hudName.textContent = explorerName;
+        hudScore.textContent = '0';
+        switchScreen('quiz');
+        renderQuestion();
+      }
+
+      function renderQuestion() {
+        answered = false;
+        const item = quizQuestions[currentIndex];
+        qCurrent.textContent = currentIndex + 1;
+        progressFill.style.width = `${((currentIndex + 1) / quizQuestions.length) * 100}%`;
+        qCategory.textContent = item.category;
+        qText.textContent = item.question;
+
+        feedbackBox.classList.add('hidden');
+        optionsList.innerHTML = '';
+
+        const letters = ['A', 'B', 'C', 'D'];
+        item.options.forEach((optText, idx) => {
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'option-btn';
+          btn.innerHTML = `<span class="opt-letter">${letters[idx]}</span><span class="opt-text">${optText}</span>`;
+          btn.addEventListener('click', () => handleAnswer(idx, btn));
+          optionsList.appendChild(btn);
+        });
+      }
+
+      function animateScore(from, to) {
+        const start = performance.now();
+        const duration = 450;
+        function step(now) {
+          const progress = Math.min((now - start) / duration, 1);
+          hudScore.textContent = Math.round(from + (to - from) * progress);
+          if (progress < 1) requestAnimationFrame(step);
+        }
+        requestAnimationFrame(step);
+      }
+
+      function handleAnswer(selectedIndex, clickedBtn) {
+        if (answered) return;
+        answered = true;
+
+        const item = quizQuestions[currentIndex];
+        const isCorrect = selectedIndex === item.correct;
+        const allOptBtns = optionsList.querySelectorAll('.option-btn');
+
+        allOptBtns.forEach((btn, idx) => {
+          btn.disabled = true;
+          if (idx === item.correct) {
+            btn.classList.add('correct');
+          } else if (idx === selectedIndex && !isCorrect) {
+            btn.classList.add('wrong');
+          }
+        });
+
+        if (isCorrect) {
+          playTone('correct');
+          const oldScore = score;
+          score += 20;
+          animateScore(oldScore, score);
+          feedbackBox.className = 'feedback-box is-correct';
+          feedbackTitle.textContent = 'Tepat Sekali! +20 Poin';
+        } else {
+          playTone('wrong');
+          feedbackBox.className = 'feedback-box is-wrong';
+          feedbackTitle.textContent = 'Kurang Tepat (0 Poin)';
+        }
+
+        userAnswers.push({
+          question: item.question,
+          isCorrect,
+          correctAnswer: item.options[item.correct]
+        });
+
+        feedbackDesc.textContent = item.explanation;
+        btnNext.textContent =
+          currentIndex === quizQuestions.length - 1
+            ? 'Lihat Sertifikat Hasil Akhir \u2192'
+            : 'Soal Berikutnya \u2192';
+      }
+
+      btnNext.addEventListener('click', () => {
+        playTone('click');
+        if (currentIndex < quizQuestions.length - 1) {
+          currentIndex++;
+          renderQuestion();
+        } else {
+          showCertificate();
+        }
+      });
+
+      // ==================== TAHAP 4: SERTIFIKAT & KONFETI ====================
+      function showCertificate() {
+        playTone('victory');
+        switchScreen('result');
+
+        const correctCount = userAnswers.filter((a) => a.isCorrect).length;
+        document.getElementById('cert-name').textContent = explorerName;
+        document.getElementById('cert-final-score').textContent = score;
+        document.getElementById('cert-stats').textContent = `Menjawab benar ${correctCount} dari ${quizQuestions.length} pertanyaan sejarah Nusantara.`;
+
+        let rank = 'Pelajar Sejarah Nusantara';
+        if (score === 100) rank = 'Mahapatih Sejarah Nusantara';
+        else if (score >= 80) rank = 'Laksamana Penjelajah Utama';
+        else if (score >= 60) rank = 'Cendekiawan Muda Nusantara';
+        document.getElementById('cert-rank').textContent = rank;
+
+        const reviewList = document.getElementById('review-list');
+        reviewList.innerHTML = '';
+        userAnswers.forEach((ans, i) => {
+          const row = document.createElement('div');
+          row.className = `review-item ${ans.isCorrect ? 'ok' : 'no'}`;
+          row.innerHTML = `
+            <span class="rev-badge">${ans.isCorrect ? '+20' : '0'}</span>
+            <div class="rev-content">
+              <strong>Soal ${i + 1}:</strong> ${ans.question}
+              <small>Kunci Jawaban: ${ans.correctAnswer}</small>
+            </div>
+          `;
+          reviewList.appendChild(row);
+        });
+
+        launchConfetti();
+      }
+
+      document.getElementById('btn-replay-map').addEventListener('click', () => {
+        playTone('click');
+        resetMapZoom();
+        switchScreen('map');
+      });
+
+      document.getElementById('btn-retry-quiz').addEventListener('click', () => {
+        playTone('click');
+        startQuiz();
+      });
+
+      // ==================== PARTIKEL LATAR & KONFETI EMAS ====================
+      const bgCanvas = document.getElementById('bg-particles');
+      const bgCtx = bgCanvas.getContext('2d');
+      let particles = [];
+
+      function resizeCanvases() {
+        bgCanvas.width = window.innerWidth;
+        bgCanvas.height = window.innerHeight;
+        const cCanvas = document.getElementById('confetti-canvas');
+        cCanvas.width = window.innerWidth;
+        cCanvas.height = window.innerHeight;
+      }
+      window.addEventListener('resize', resizeCanvases);
+      resizeCanvases();
+
+      for (let i = 0; i < 42; i++) {
+        particles.push({
+          x: Math.random() * bgCanvas.width,
+          y: Math.random() * bgCanvas.height,
+          r: Math.random() * 2 + 0.6,
+          vy: -(Math.random() * 0.35 + 0.12),
+          alpha: Math.random() * 0.5 + 0.15
+        });
+      }
+
+      function animateBgParticles() {
+        bgCtx.clearRect(0, 0, bgCanvas.width, bgCanvas.height);
+        particles.forEach((p) => {
+          p.y += p.vy;
+          if (p.y < -10) {
+            p.y = bgCanvas.height + 10;
+            p.x = Math.random() * bgCanvas.width;
+          }
+          bgCtx.beginPath();
+          bgCtx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+          bgCtx.fillStyle = `rgba(232, 195, 114, ${p.alpha})`;
+          bgCtx.fill();
+        });
+        requestAnimationFrame(animateBgParticles);
+      }
+      animateBgParticles();
+
+      function launchConfetti() {
+        const canvas = document.getElementById('confetti-canvas');
+        const ctx = canvas.getContext('2d');
+        const colors = ['#f2cf7e', '#d4a345', '#34d399', '#fef3c7', '#fbbf24'];
+        const pieces = Array.from({ length: 85 }, () => ({
+          x: Math.random() * canvas.width,
+          y: -20 - Math.random() * 180,
+          w: Math.random() * 8 + 5,
+          h: Math.random() * 5 + 3,
+          vy: Math.random() * 3 + 2,
+          vx: (Math.random() - 0.5) * 2.5,
+          rot: Math.random() * 360,
+          vRot: (Math.random() - 0.5) * 8,
+          color: colors[Math.floor(Math.random() * colors.length)]
+        }));
+
+        let frames = 0;
+        function renderConfetti() {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          pieces.forEach((c) => {
+            c.x += c.vx;
+            c.y += c.vy;
+            c.rot += c.vRot;
+            ctx.save();
+            ctx.translate(c.x, c.y);
+            ctx.rotate((c.rot * Math.PI) / 180);
+            ctx.fillStyle = c.color;
+            ctx.fillRect(-c.w / 2, -c.h / 2, c.w, c.h);
+            ctx.restore();
+          });
+          frames++;
+          if (frames < 190) {
+            requestAnimationFrame(renderConfetti);
+          } else {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+          }
+        }
+        renderConfetti();
+      }
+    });
+  </script>
+</body>
+</html>
